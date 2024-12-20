@@ -99,6 +99,8 @@ Using Aspect-Oriented Programming (AOP) helps to solve these issues by allowing 
 7. Proxy: Proxy is the complete logic that results from weaving process. Spring uses either JDK dynamic proxy or a CGLIB proxy. These libraries are used to create classes/interface at runtime.
    Someone asked me or told me if you want to change any class/method behaviour without modifying the class what you will do? We can create another class and extend the exisiting class and override its method change the method behaviour. This is what Spring does and create a new class that is called Proxy class at runtime by using these libraries.
 
+8. Introduction: Adding new methods or fields to a target class dynamically. This is not supported by Spring AOP but supported by AspectJ. But till we can use `Introductions` in Spring but it is limited to introducing interfaces (using `@DeclareParents`) and can’t introduce arbitrary methods or fields.
+
 # Open source AOP Library
 
 1. AspectJ
@@ -485,60 +487,52 @@ public void afterThrowingAdvice(Exception ex) {
     System.out.println("After Throwing Advice - Exception: " + ex.getMessage());
 }
 ```
+
 - The `throwing` attribute specifies the name of the parameter in the advice method that should receive the exception thrown by the join point (the target method).
 - When a method matching the pointcut throws an exception, the AOP framework captures it and attempts to pass it to the advice method(`afterThrowingAdvice()`). The parameter name(`ex`) specified in throwing must match the name of the corresponding parameter(`Exception ex`) in the advice method.
 - If the throwing attribute is omitted, Spring has no way to map the thrown exception to a parameter in the advice method.
--  Consequently the framework considers the advice is incompatible with the exception-handling process and the advice is not invoked, even if the target method throws an exception.
-
-
-
+- Consequently the framework considers the advice is incompatible with the exception-handling process and the advice is not invoked, even if the target method throws an exception.
 
 # @Around Advice
 
 ProceedingJoinPoint: A special type of join point automatically passed by the AOP framework to the `@Around` advice method. Provides critical context about the intercepted method, including: Method signature, Method arguments, Ability to proceed with or halt the method execution using the proceed() method.
 
-Adding Extra Parameters to Advice Methods:
-    - Spring AOP only injects the ProceedingJoinPoint object by default.
-    - If we add extra parameters like `String xyz` to the advice method, Spring cannot automatically inject them unless:
-        - They are explicitly defined in the pointcut expression (e.g., using args to match method arguments).
-        - They are annotations on the intercepted method (e.g., @annotation for custom annotations).
-    - Extra parameters are not part of the ProceedingJoinPoint context and require explicit mapping or configuration in the pointcut.
-
-
+Adding Extra Parameters to Advice Methods: - Spring AOP only injects the ProceedingJoinPoint object by default. - If we add extra parameters like `String xyz` to the advice method, Spring cannot automatically inject them unless: - They are explicitly defined in the pointcut expression (e.g., using args to match method arguments). - They are annotations on the intercepted method (e.g., @annotation for custom annotations). - Extra parameters are not part of the ProceedingJoinPoint context and require explicit mapping or configuration in the pointcut.
 
 In addition to ProceedingJoinPoint, the advice method can include parameters to bind `method arguments`, `target objects`, or `annotations`. These parameters are determined by the pointcut expression and bindings in the `@Around` annotation.
 
 1. Binding Method Arguments:
-    ```java
-    @Around("execution(* com.altafjava.service.*.*(..)) && args(arg1, arg2)")
-    public Object aroundWithArgs(ProceedingJoinPoint joinPoint, String arg1, int arg2) throws Throwable {
-        System.out.println("Before");
-        System.out.println("Arguments: " + arg1 + ", " + arg2);
-        Object result = joinPoint.proceed();
-        System.out.println("After");
-        return result
-    }
-    ```
+   ```java
+   @Around("execution(* com.altafjava.service.*.*(..)) && args(arg1, arg2)")
+   public Object aroundWithArgs(ProceedingJoinPoint joinPoint, String arg1, int arg2) throws Throwable {
+       System.out.println("Before");
+       System.out.println("Arguments: " + arg1 + ", " + arg2);
+       Object result = joinPoint.proceed();
+       System.out.println("After");
+       return result
+   }
+   ```
 2. Binding Target Objects:
-    ```java
-    @Around("execution(* com.altafjava.service.*.*(..)) && target(targetObject)")
-    public Object aroundWithTarget(ProceedingJoinPoint joinPoint, Object targetObject) throws Throwable {
-        System.out.println("Before");
-        System.out.println("Target Object: " + targetObject.getClass().getName());
-        Object result = joinPoint.proceed();
-        System.out.println("After");
-        return result
-    }
-    ```
+
+   ```java
+   @Around("execution(* com.altafjava.service.*.*(..)) && target(targetObject)")
+   public Object aroundWithTarget(ProceedingJoinPoint joinPoint, Object targetObject) throws Throwable {
+       System.out.println("Before");
+       System.out.println("Target Object: " + targetObject.getClass().getName());
+       Object result = joinPoint.proceed();
+       System.out.println("After");
+       return result
+   }
+   ```
 
 3. Binding Annotation Properties:
-    ```java
-    @Around("@annotation(cacheable)")
-    public Object aroundWithAnnotation(ProceedingJoinPoint joinPoint, Cacheable cacheable) throws Throwable {
-        System.out.println("Before");
-        System.out.println("Cacheable Annotation Name: " + cacheable.value());
-        Object result = joinPoint.proceed();
-        System.out.println("After");
-        return result
-    }
-    ```
+   ```java
+   @Around("@annotation(cacheable)")
+   public Object aroundWithAnnotation(ProceedingJoinPoint joinPoint, Cacheable cacheable) throws Throwable {
+       System.out.println("Before");
+       System.out.println("Cacheable Annotation Name: " + cacheable.value());
+       Object result = joinPoint.proceed();
+       System.out.println("After");
+       return result
+   }
+   ```
