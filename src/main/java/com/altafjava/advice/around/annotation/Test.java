@@ -9,7 +9,7 @@ import com.altafjava.advice.Calculator;
 
 @Configuration
 @EnableAspectJAutoProxy
-@ComponentScan(basePackages = "com.altafjava.advice.around")
+@ComponentScan(basePackages = "com.altafjava.advice.around.annotation")
 public class Test {
 
 	@Bean

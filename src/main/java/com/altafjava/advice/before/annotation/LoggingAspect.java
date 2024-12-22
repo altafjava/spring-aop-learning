@@ -1,5 +1,6 @@
 package com.altafjava.advice.before.annotation;
 
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -23,7 +24,7 @@ public class LoggingAspect {
 	 * Before Advice: Executed before any Calculator method.
 	 */
 	@Before("calculatorMethods()")
-	public void beforeAdvice() {
-		System.out.println("Before Advice - Method execution is about to start.");
+	public void beforeAdvice(JoinPoint joinPoint) {
+		System.out.println("Before Advice - Method " + joinPoint.getSignature().getName() + "() execution is about to start.");
 	}
 }
